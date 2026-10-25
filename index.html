@@ -1,0 +1,357 @@
+<title>สมุดโทรศัพท์ รพ.</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one-column switchboard — search bar on top, department rows below, big-number sheet slides up on tap */
+:root{
+  --bg:#f3f6f5; --surface:#ffffff; --line:#d9e2df; --fg:#14211e; --muted:#5d6f6a;
+  --accent:#0d6b5a; --accent-ink:#ffffff; --accent-soft:#e1efeb;
+  --call:#1f8a4c; --star:#c88a12; --danger:#b5382e;
+  --f-display:"Bai Jamjuree","IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1614; --surface:#16211e; --line:#26342f; --fg:#e6efec; --muted:#93a6a0;
+  --accent:#4fbfa6; --accent-ink:#06201a; --accent-soft:#1b302a;
+  --call:#3fbf75; --star:#e3b04b; --danger:#ef7a6f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1614; --surface:#16211e; --line:#26342f; --fg:#e6efec; --muted:#93a6a0;
+  --accent:#4fbfa6; --accent-ink:#06201a; --accent-soft:#1b302a;
+  --call:#3fbf75; --star:#e3b04b; --danger:#ef7a6f; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:16px 10px;display:grid;gap:10px}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:700;font-size:22px;margin:0;letter-spacing:.2px;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:14px;padding:6px 0;white-space:nowrap}
+
+.search{display:flex;gap:8px;align-items:stretch}
+.field{flex:1;min-width:0;position:relative}
+.field input{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);
+  font:inherit;font-size:17px;padding:0 40px 0 16px}
+.field input:focus{border-color:var(--accent);outline:none}
+.clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:20px}
+.mic{width:52px;height:52px;flex:none;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.mic svg{width:24px;height:24px}
+.mic.on{background:var(--danger);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--danger) 50%,transparent)}50%{box-shadow:0 0 0 10px transparent}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.hint{font-size:13px;color:var(--muted);min-height:20px}
+.hint b{color:var(--fg)}
+
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.sec{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+.list{display:grid;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.row:first-child{border-top:0}
+.row:active{background:var(--accent-soft)}
+.row .info{flex:1;min-width:0}
+.row .name{font-weight:600;font-size:16px;line-height:1.3}
+.row .meta{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .num{font-family:var(--f-num);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums;color:var(--accent);letter-spacing:.5px}
+.row .fav{color:var(--star);font-size:14px;margin-right:2px}
+mark{background:color-mix(in srgb,var(--star) 30%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.sample{font-size:12px;color:var(--muted);margin-top:18px;text-align:center}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-radius:20px 20px 0 0;
+  padding:22px max(20px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
+  max-width:640px;margin:0 auto;display:grid;gap:14px;animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet .cat{font-size:13px;color:var(--muted)}
+.sheet h2{font-family:var(--f-display);font-size:24px;margin:0;line-height:1.25;text-wrap:balance}
+.bignum{font-family:var(--f-num);font-weight:600;font-size:clamp(40px,13vw,60px);letter-spacing:2px;color:var(--fg);font-variant-numeric:tabular-nums;user-select:all;line-height:1.1}
+.alt{display:flex;flex-wrap:wrap;gap:8px}
+.alt a,.alt span{font-family:var(--f-num);font-size:15px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+.note{font-size:14px;color:var(--muted)}
+.actions{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+.callbtn{height:56px;border-radius:14px;background:var(--call);color:#fff;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.sbtn{height:56px;min-width:56px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);font-size:14px}
+.sbtn.star[aria-pressed="true"]{color:var(--star);border-color:var(--star)}
+
+/* editor */
+.editor{display:grid;gap:10px}
+.editor textarea{width:100%;min-height:42vh;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-family:var(--f-num);font-size:13px;padding:10px;line-height:1.55}
+.editor p{margin:0;font-size:13.5px;color:var(--muted)}
+.editor code{font-family:var(--f-num);background:var(--accent-soft);padding:1px 5px;border-radius:4px;color:var(--fg)}
+.erow{display:flex;gap:8px;flex-wrap:wrap}
+.pbtn{height:46px;padding:0 18px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="top">
+      <h1>สมุดโทรศัพท์ภายใน<small id="hosp">โรงพยาบาลมหาสารคาม · กดชื่อแล้วโทรได้เลย</small></h1>
+      <button class="linkbtn" id="editBtn" type="button">แก้ไขรายชื่อ</button>
+    </div>
+    <div class="search">
+      <div class="field">
+        <input id="q" type="search" placeholder="พิมพ์ชื่อ เช่น ER, ICU med, ห้องคลอด, อช" autocomplete="off" aria-label="ค้นหาหน่วยงาน">
+        <button class="clear" id="clr" type="button" aria-label="ล้าง" hidden>×</button>
+      </div>
+      <button class="mic" id="mic" type="button" aria-label="พูดเพื่อค้นหา">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+    </div>
+    <div class="hint" id="hint">แตะไมค์แล้วพูด เช่น <b>"โทรไปห้องคลอด"</b></div>
+    <div class="chips" id="chips"></div>
+  </header>
+  <main id="out"></main>
+  <p class="sample" id="sampleNote">เบอร์จากแผ่นติดผนัง 2 แผ่น รายการที่มี ⚠ สองแผ่นให้เบอร์ไม่ตรงกัน ควรโทรยืนยันก่อน</p>
+</div>
+<div id="layer"></div>
+
+<script>
+/* ===== ข้อมูลตัวอย่าง: ชื่อ | เบอร์ (คั่นหลายเบอร์ด้วย ,) | หมวด | คำค้นอื่น | หมายเหตุ ===== */
+const SAMPLE = `พิเศษอายุรกรรม 2 (ชั้น 2)	9184	ตึกอายุรกรรม	พิเศษเมด 2 พิเศษอายุรกรรม ทองดี	
+พิเศษอายุรกรรม 3 (ชั้น 3)	9185	ตึกอายุรกรรม	พิเศษเมด 3 พิเศษอายุรกรรม ทองดี	
+Stroke Unit (ชั้น 4)	9299,9706	ตึกอายุรกรรม	สโตรก stroke หลอดเลือดสมอง	
+อช.1 อายุรกรรมชาย 1 (ชั้น 5)	9133,9316	ตึกอายุรกรรม	อช1 อช 1 เมดชาย 1 med ชาย	
+อช.2 อายุรกรรมชาย 2 (ชั้น 6)	9711,9712	ตึกอายุรกรรม	อช2 อช 2 เมดชาย 2 med ชาย	
+อญ.1 อายุรกรรมหญิง 1 (ชั้น 7)	9182,9187	ตึกอายุรกรรม	อญ1 อญ 1 เมดหญิง 1 med หญิง	
+อญ.2 อายุรกรรมหญิง 2 (ชั้น 8)	9181,9331	ตึกอายุรกรรม	อญ2 อญ 2 เมดหญิง 2 med หญิง	เบอร์ 9331 มีเฉพาะแผ่นที่ 2
+อายุรกรรมพิเศษรวม (ชั้น 9)	9713,9714	ตึกอายุรกรรม	พิเศษรวม เมดพิเศษ	
+สงฆ์อาพาธ (ชั้น 10)	9715,9716	ตึกอายุรกรรม	พระ สงฆ์ พระอาพาธ	
+ห้องตรวจ TB / คลินิกวัณโรค (ชั้น 1)	9337	ตึกเฉพาะโรค	ทีบี วัณโรค tb	
+เฉพาะโรค 2 (ชั้น 2)	9695	ตึกเฉพาะโรค	เฉพาะโรคสอง	
+เฉพาะโรค 3 (ชั้น 3)	9168	ตึกเฉพาะโรค	เฉพาะโรคสาม	
+เฉพาะโรค 4 (ชั้น 4)	9357	ตึกเฉพาะโรค	เฉพาะโรคสี่	
+ศัลยกรรมชาย (ชั้น 1)	9135	ตึก 60 ปี	ศัลย์ชาย sx ชาย หกสิบปี	⚠ แผ่นที่ 2 มี ศช (114/1) เบอร์ 9136 / 9315
+ยูโร (ชั้น 2)	9378	ตึก 60 ปี	ยูโร uro urology ทางเดินปัสสาวะ 114/2 หกสิบปี	
+60 ปี ชั้น 3	9320	ตึก 60 ปี	หกสิบปี ชั้น 3	
+60 ปี ชั้น 4	9177	ตึก 60 ปี	หกสิบปี ชั้น 4	
+60 ปี ชั้น 5	9179	ตึก 60 ปี	หกสิบปี ชั้น 5	
+ศช (114/1)	9136,9315	ตึก 60 ปี	ศัลย์ชาย ศัลยกรรมชาย 114	⚠ มีเฉพาะแผ่นที่ 2 แผ่นที่ 1 ให้ศัลยกรรมชาย 9135
+ICU-med 1 (ชั้น 2)	9154	ตึกเอกซเรย์	ไอซียูเมด 1 micu icu med เอกซเรย์	
+CCU (ชั้น 3)	9692	ตึกเอกซเรย์	ซีซียู หัวใจ ccu	
+ICU-med 2 (ชั้น 3)	9696	ตึกเอกซเรย์	ไอซียูเมด 2 micu icu med	
+ICU-med 3 (ชั้น 3)	9761	ตึกเอกซเรย์	ไอซียูเมด 3 micu icu med	
+ไตเทียม (ชั้น 4)	9155	ตึกเอกซเรย์	ไต ฟอกไต hd hemodialysis	
+CAPD (ชั้น 4)	9370	ตึกเอกซเรย์	ซีเอพีดี ล้างไตทางช่องท้อง pd capd	
+ลีลาวดี	9728	ตึกเอกซเรย์	ลีลาวดี	
+ห้องฉุกเฉิน ER (ชั้น 1)	9405,9704,9107	ตึกอุบัติเหตุ	อีอาร์ ฉุกเฉิน อุบัติเหตุ er	เบอร์ 9107 มีเฉพาะแผ่นที่ 2
+Trauma ICU / ICU ศัลย์ ER7 (ชั้น 7)	9604	ตึกอุบัติเหตุ	ทรอม่า trauma er7 อีอาร์เจ็ด ไอซียูศัลย์ sicu	
+ICU ศัลย์ (ชั้น 7)	9151,9152	ตึกอุบัติเหตุ	ไอซียูศัลย์ sicu icu sx	
+ศอ.8 / Trauma ER8 (ชั้น 8)	9681,9682	ตึกอุบัติเหตุ	ศอ8 ศอ 8 ศัลยกรรมอุบัติเหตุ ทรอม่า trauma er8	
+ENT หู คอ จมูก (ชั้น 8)	9689	ตึกอุบัติเหตุ	อีเอ็นที หู er8	
+ศกช (ชั้น 9)	9336	ตึกอุบัติเหตุ	ศกช ศัลยกรรมกระดูกชาย กระดูกชาย ortho er9	
+ตา (ชั้น 9)	9178	ตึกอุบัติเหตุ	จักษุ eye er9	
+ศกญ (ชั้น 10)	9138,9311	ตึกอุบัติเหตุ	ศกญ ศัลยกรรมกระดูกหญิง กระดูกหญิง ortho er10	เบอร์ 9311 มีเฉพาะแผ่นที่ 2
+พิเศษศัลย์กระดูก ER10 (ชั้น 10)	9705	ตึกอุบัติเหตุ	พิเศษกระดูก er10 ortho	
+ศญ ศัลยกรรมหญิง ER11 (ชั้น 11)	9380	ตึกอุบัติเหตุ	ศญ ศัลย์หญิง sx หญิง er11	
+พิเศษอุบัติเหตุ 11 (ชั้น 11)	9735	ตึกอุบัติเหตุ	พิเศษอุบัติเหตุ	
+ห้องคลอด (ชั้น 2)	9145,9146	ตึกสูติกรรม	คลอด lr labour	
+NS ทารกแรกเกิด (ชั้น 3)	9173,9171	ตึกสูติกรรม	เอ็นเอส ns nursery ทารก	
+NICU (ชั้น 3)	9175	ตึกสูติกรรม	นิคู เอ็นไอซียู nicu	
+สูติกรรม / สูติ-สามัญ (ชั้น 4)	9140,9401	ตึกสูติกรรม	สูติ หลังคลอด ob	
+นรีเวช / สูติ-นรีเวช (ชั้น 5)	9141,9402	ตึกสูติกรรม	นรีเวช gyn	
+เด็กเล็ก (ชั้น 5)	9170	ตึกสูติกรรม	เด็กเล็ก กุมาร	
+กุมาร เด็กโต (ชั้น 6)	9328	ตึกสูติกรรม	เด็ก เด็กโต ped สูติ6	
+ICU ทั่วไป/เด็ก (ชั้น 6)	9310	ตึกสูติกรรม	ไอซียูเด็ก picu icu เด็ก	
+ศัลยกรรมทั่วไป	9139	หน่วยบริการอื่น	ศัลย์ทั่วไป sx	
+วิสัญญี ชั้น 3	9234	หน่วยบริการอื่น	ดมยา anesthesia	
+วิสัญญี ชั้น 4	9229	หน่วยบริการอื่น	ดมยา anesthesia	
+ห้องตรวจ OPD ชั้น 1	9125	หน่วยบริการอื่น	โอพีดี opd ห้องตรวจ	
+ห้องตรวจ OPD ชั้น 2 (DM/GI)	9121,9130	หน่วยบริการอื่น	โอพีดี opd เบาหวาน dm gi	⚠ แผ่นที่ 1 ระบุ 9121 แผ่นที่ 2 ระบุ 9130
+เวชกรรมฟื้นฟู	9779	หน่วยบริการอื่น	กายภาพ rehab	
+คลินิกธาลัสซีเมีย	9174	หน่วยบริการอื่น	ธาลัส thalassemia	
+บริบาลบรรเทา	9409	หน่วยบริการอื่น	palliative ประคับประคอง	
+บ้านร่มเย็น	9176	หน่วยบริการอื่น	ร่มเย็น	
+กันเกรา	9261	หน่วยบริการอื่น	กันเกรา	
+สังคมสงเคราะห์	9111	หน่วยบริการอื่น	สังคม social	
+IC ควบคุมการติดเชื้อ	9227	หน่วยบริการอื่น	ไอซี ic infection	
+จ่ายกลาง	9273	หน่วยบริการอื่น	cssd ซีเอสเอสดี	
+ห้องยาฉุกเฉิน (ห้องยา ER)	9286	เภสัชกรรม	ห้องยาอีอาร์ ยาฉุกเฉิน er	
+ห้องยานอก ชั้น 1	9250	เภสัชกรรม	ห้องยาโอพีดี opd ยานอก	
+ห้องยานอก ชั้น 2	9246	เภสัชกรรม	ห้องยาโอพีดี opd ยานอก	
+คลังยาห้องยานอก	9364	เภสัชกรรม	คลังยา opd	
+ห้องยาใน ยากลับบ้าน (หน้าห้อง)	9248	เภสัชกรรม	ห้องยาผู้ป่วยใน ไอพีดี ipd ยาใน ยากลับบ้าน หน้าห้อง home med	
+ห้องยาใน ยาผู้ป่วยนอนตึก (หลังห้อง)	9249	เภสัชกรรม	ห้องยาผู้ป่วยใน ไอพีดี ipd ยาใน ยาตึก ยาวอร์ด หลังห้อง	
+เภสัชสนเทศ (DIS)	9339	เภสัชกรรม	di dis ดีไอ ดีไอเอส drug information	
+ผลิตยา ชั้น 1	9242	เภสัชกรรม	ผลิตยา	
+ผลิตยา ชั้น 2	9243	เภสัชกรรม	ผลิตยา	
+คลังยา (พี่หน่อย)	9251	เภสัชกรรม	คลังยา หน่อย	
+คลังยา (จัดซื้อ)	9252	เภสัชกรรม	คลังยา จัดซื้อ	
+คลังยา (พี่ไก่)	9244	เภสัชกรรม	คลังยา ไก่	
+คลังยา (น้ำเกลือ/ยาเย็น)	9283	เภสัชกรรม	คลังยา น้ำเกลือ ยาเย็น	
+การเงินยาใน	9388	เภสัชกรรม	การเงิน ipd	
+การเงินยานอก	9245	เภสัชกรรม	การเงิน opd	
+ศูนย์คอมพิวเตอร์	9270,9271	สนับสนุน	ศูนย์คอม ไอที it คอม	
+ซ่อมบำรุง	9277	สนับสนุน	ช่าง ซ่อม	
+รปภ. หน้า รพ.	9194	สนับสนุน	ยาม รปภ	
+รปภ. หน้าลิฟต์ ตึก 11	9780	สนับสนุน	ยาม รปภ ลิฟต์	
+ร้านค้า รพ.	9398	สนับสนุน	ร้านค้า	
+ศูนย์อาหาร	9258	สนับสนุน	อาหาร โรงอาหาร	
+พัสดุ (คลังสำนักงาน)	9332	สนับสนุน	พัสดุ คลังสนง	
+พัสดุ (คลังการแพทย์)	9254	สนับสนุน	พัสดุ คลังการแพทย์	
+พัสดุ (งานจัดซื้อ ชั้น 3)	9257	สนับสนุน	พัสดุ จัดซื้อ	`;
+
+const KEY = 'hospdir.v2', FAV='hospdir.fav', REC='hospdir.rec';
+const store = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},
+               set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+
+function parse(txt){
+  return txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map((l,i)=>{
+    const c=l.split(/\t|\|/).map(s=>s.trim());
+    return {id:i, name:c[0]||'', nums:(c[1]||'').split(/[,\/]/).map(s=>s.trim()).filter(Boolean),
+            cat:c[2]||'อื่นๆ', alias:c[3]||'', note:c[4]||''};
+  }).filter(d=>d.name && d.nums.length);
+}
+let raw = store.get(KEY,null);
+let DATA = parse(raw ?? SAMPLE);
+let favs = new Set(store.get(FAV,[]));
+let recents = store.get(REC,[]);
+let cat = 'ทั้งหมด'; const WARN='⚠ ต้องตรวจ';
+const $ = s=>document.querySelector(s);
+const esc = s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ===== ค้นหา: ตัดคำพูดทั่วไปทิ้ง แล้วให้คะแนน ===== */
+const FILLER = /(ขอ|เบอร์|โทร(ศัพท์)?|ไป(ที่|หา)?|หา|ติดต่อ|ห้อง(?=\s*$)|หน่อย|ครับ|ค่ะ|คะ|นะ|ด้วย|ที่|ของ|แผนก|หน่วย(งาน)?)/g;
+const norm = s=>s.toLowerCase().replace(/[()\-\.\/]/g,' ').replace(/\s+/g,' ').trim();
+function cleanQuery(q){ return norm(q.replace(FILLER,' ')); }
+function score(d,q){
+  if(!q) return 1;
+  const name=norm(d.name), al=norm(d.alias), all=name+' '+al+' '+d.nums.join(' ')+' '+norm(d.cat);
+  const nospace = all.replace(/\s/g,'');
+  if(name===q) return 100;
+  let s=0;
+  if(name.startsWith(q)) s+=60;
+  if(all.includes(q)) s+=40;
+  else if(nospace.includes(q.replace(/\s/g,''))) s+=30;
+  const toks=q.split(' ').filter(Boolean);
+  if(toks.length>1 && toks.every(t=>all.includes(t))) s+=25;
+  return s;
+}
+function hl(text,q){
+  if(!q) return esc(text);
+  const toks=q.split(' ').filter(t=>t.length>0).map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if(!toks.length) return esc(text);
+  return esc(text).replace(new RegExp('('+toks.join('|')+')','gi'),'<mark>$1</mark>');
+}
+
+function rowHTML(d,q){
+  return `<button class="row" type="button" data-id="${d.id}">
+    <div class="info"><div class="name">${favs.has(d.name)?'<span class="fav">★</span>':''}${hl(d.name,q)}</div>
+    <div class="meta">${esc(d.cat)}${d.nums.length>1?' · '+d.nums.length+' เบอร์':''}${d.note?' · '+esc(d.note):''}</div></div>
+    <div class="num">${hl(d.nums[0],q)}</div></button>`;
+}
+function renderChips(){
+  const cats=['ทั้งหมด',...new Set(DATA.map(d=>d.cat))]; if(DATA.some(d=>d.note.includes('⚠'))) cats.push(WARN);
+  $('#chips').innerHTML=cats.map(c=>`<button class="chip" type="button" aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+}
+function render(){
+  const q=cleanQuery($('#q').value);
+  $('#clr').hidden=!$('#q').value;
+  let pool = DATA.filter(d=>cat==='ทั้งหมด'||(cat===WARN?d.note.includes('⚠'):d.cat===cat));
+  let html='';
+  if(q){
+    const hits=pool.map(d=>[d,score(d,q)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+    html = hits.length ? `<div class="sec">ผลการค้นหา ${hits.length} รายการ</div><div class="list">${hits.map(d=>rowHTML(d,q)).join('')}</div>`
+                       : `<div class="list"><div class="empty">ไม่พบ "${esc($('#q').value)}"<br>ลองพิมพ์คำสั้นลง หรือเพิ่มคำค้นในหน้าแก้ไขรายชื่อ</div></div>`;
+  }else{
+    const fav=pool.filter(d=>favs.has(d.name));
+    const rec=recents.map(n=>pool.find(d=>d.name===n)).filter(d=>d&&!favs.has(d.name)).slice(0,4);
+    if(fav.length) html+=`<div class="sec">ติดดาว</div><div class="list">${fav.map(d=>rowHTML(d)).join('')}</div>`;
+    if(rec.length) html+=`<div class="sec">โทรล่าสุด</div><div class="list">${rec.map(d=>rowHTML(d)).join('')}</div>`;
+    const groups={}; pool.forEach(d=>(groups[d.cat]??=[]).push(d));
+    for(const [c,arr] of Object.entries(groups)) html+=`<div class="sec">${esc(c)}</div><div class="list">${arr.map(d=>rowHTML(d)).join('')}</div>`;
+  }
+  $('#out').innerHTML=html;
+  $('#sampleNote').hidden = raw!==null;
+}
+
+/* ===== แผ่นแสดงเบอร์ ===== */
+function closeLayer(){ $('#layer').innerHTML=''; }
+function toast(t){ const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.append(el); setTimeout(()=>el.remove(),1800); }
+function openSheet(d){
+  const n=d.nums[0];
+  $('#layer').innerHTML=`<div class="scrim" data-x></div><div class="sheet" role="dialog" aria-label="${esc(d.name)}">
+    <div class="cat">${esc(d.cat)}</div><h2>${esc(d.name)}</h2>
+    <div class="bignum" id="big">${esc(n)}</div>
+    ${d.nums.length>1?`<div class="alt">${d.nums.slice(1).map(x=>`<a href="tel:${esc(x)}" data-call="${esc(x)}">${esc(x)}</a>`).join('')}</div>`:''}
+    ${d.note?`<div class="note">${esc(d.note)}</div>`:''}
+    <div class="actions">
+      <a class="callbtn" href="tel:${esc(n)}" data-call="${esc(n)}">โทร ${esc(n)}</a>
+      <button class="sbtn" type="button" id="cp">คัดลอก</button>
+      <button class="sbtn star" type="button" id="st" aria-pressed="${favs.has(d.name)}" aria-label="ติดดาว">★</button>
+    </div></div>`;
+  $('#layer').onclick=e=>{
+    if(e.target.dataset.x!==undefined) return closeLayer();
+    const c=e.target.closest('[data-call]');
+    if(c){ recents=[d.name,...recents.filter(x=>x!==d.name)].slice(0,8); store.set(REC,recents); setTimeout(render,300); }
+  };
+  $('#cp').onclick=()=>{ navigator.clipboard?.writeText(n).then(()=>toast('คัดลอก '+n+' แล้ว'),()=>{getSelection().selectAllChildren($('#big'));toast('เลือกเบอร์ไว้แล้ว กดคัดลอกได้เลย')}) ?? getSelection().selectAllChildren($('#big')); };
+  $('#st').onclick=e=>{ favs.has(d.name)?favs.delete(d.name):favs.add(d.name); store.set(FAV,[...favs]); e.currentTarget.setAttribute('aria-pressed',favs.has(d.name)); render(); };
+}
+
+/* ===== แก้ไขรายชื่อ (วางจาก Excel) ===== */
+function toText(){ return DATA.map(d=>[d.name,d.nums.join(','),d.cat,d.alias,d.note].join('\t')).join('\n'); }
+function openEditor(){
+  $('#layer').innerHTML=`<div class="scrim" data-x></div><div class="sheet editor" role="dialog" aria-label="แก้ไขรายชื่อ">
+    <h2>แก้ไขรายชื่อหน่วยงาน</h2>
+    <p>หนึ่งบรรทัดต่อหนึ่งหน่วยงาน คัดลอกจาก Excel 5 คอลัมน์มาวางได้เลย:<br><code>ชื่อ</code> <code>เบอร์ (หลายเบอร์คั่นด้วย ,)</code> <code>หมวด</code> <code>คำค้นอื่น</code> <code>หมายเหตุ</code></p>
+    <textarea id="ta" spellcheck="false">${esc(toText())}</textarea>
+    <div class="erow"><button class="pbtn" type="button" id="sv">บันทึก</button>
+      <button class="sbtn" type="button" id="rs">กลับไปใช้ข้อมูลตั้งต้น</button>
+      <button class="sbtn" type="button" data-x>ยกเลิก</button></div>
+    <p>บันทึกไว้ในเครื่องนี้เท่านั้น ถ้าจะให้ทุกคนใน รพ. เห็นเบอร์ชุดเดียวกัน ให้แก้ข้อมูลในไฟล์แล้วอัปขึ้นเว็บ</p></div>`;
+  $('#layer').onclick=e=>{ if(e.target.dataset.x!==undefined) closeLayer(); };
+  $('#sv').onclick=()=>{ const t=$('#ta').value; const p=parse(t); if(!p.length){toast('ไม่พบรายการที่มีทั้งชื่อและเบอร์');return}
+    raw=t; store.set(KEY,t); DATA=p; cat='ทั้งหมด'; renderChips(); render(); closeLayer(); toast('บันทึก '+p.length+' หน่วยงานแล้ว'); };
+  $('#rs').onclick=()=>{ raw=null; try{localStorage.removeItem(KEY)}catch{} DATA=parse(SAMPLE); renderChips(); render(); closeLayer(); toast('กลับไปใช้ข้อมูลตั้งต้นแล้ว'); };
+}
+
+/* ===== สั่งงานด้วยเสียง ===== */
+const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, listening=false;
+function setHint(h){ $('#hint').innerHTML=h; }
+$('#mic').onclick=()=>{
+  if(!SR){ setHint('เบราว์เซอร์นี้ไม่รองรับการพูด ลองเปิดด้วย <b>Chrome</b> (Android) หรือ <b>Safari</b> (iPhone)'); return; }
+  if(listening){ rec.stop(); return; }
+  rec=new SR(); rec.lang='th-TH'; rec.interimResults=true; rec.maxAlternatives=3;
+  rec.onstart=()=>{listening=true;$('#mic').classList.add('on');setHint('กำลังฟัง… พูดชื่อหน่วยงานได้เลย');};
+  rec.onresult=e=>{
+    const r=e.results[e.results.length-1]; const t=r[0].transcript;
+    $('#q').value=t; render();
+    if(r.isFinal){
+      const q=cleanQuery(t);
+      const hits=DATA.map(d=>[d,score(d,q)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+      setHint(hits.length?`ได้ยินว่า <b>"${esc(t)}"</b>`:`ได้ยินว่า <b>"${esc(t)}"</b> แต่ไม่พบหน่วยงานนี้`);
+      if(hits.length && (hits.length===1 || hits[0][1]-(hits[1]?.[1]||0)>=20)) openSheet(hits[0][0]);
+    }
+  };
+  rec.onerror=e=>setHint(e.error==='not-allowed'||e.error==='service-not-allowed'
+      ?'ใช้ไมค์ไม่ได้ในหน้านี้ ต้องอนุญาตไมโครโฟน หรือเปิดหน้านี้จากลิงก์เว็บของ รพ.'
+      :'ไม่ได้ยินชัด ลองแตะไมค์แล้วพูดใหม่');
+  rec.onend=()=>{listening=false;$('#mic').classList.remove('on');};
+  try{rec.start()}catch{setHint('เปิดไมค์ไม่ได้ ลองอีกครั้ง')}
+};
+
+/* ===== events ===== */
+$('#q').addEventListener('input',render);
+$('#q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const f=$('#out .row'); if(f) openSheet(DATA[+f.dataset.id]); }});
+$('#clr').onclick=()=>{ $('#q').value=''; render(); $('#q').focus(); };
+$('#chips').onclick=e=>{ const c=e.target.closest('.chip'); if(!c) return; cat=c.dataset.c; renderChips(); render(); };
+$('#out').onclick=e=>{ const r=e.target.closest('.row'); if(r) openSheet(DATA[+r.dataset.id]); };
+$('#editBtn').onclick=openEditor;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLayer(); });
+renderChips(); render();
+</script>
