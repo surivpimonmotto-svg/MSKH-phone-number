@@ -83,10 +83,11 @@ mark{background:color-mix(in srgb,var(--star) 30%,transparent);color:inherit;bor
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:20}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-radius:20px 20px 0 0;
-  padding:22px max(20px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
-  max-width:640px;margin:0 auto;display:grid;gap:14px;animation:up .18s ease-out}
-@keyframes up{from{transform:translateY(30px);opacity:.6}}
+.sheet{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:21;background:var(--surface);border-radius:20px;
+  width:min(640px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;padding:24px;
+  box-shadow:0 20px 60px color-mix(in srgb,#000 35%,transparent);display:grid;gap:14px;animation:up .18s ease-out}
+.sheet.editor{top:50%}
+@keyframes up{from{transform:translate(-50%,-50%) scale(.94);opacity:.6}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet .cat{font-size:13px;color:var(--muted)}
 .sheet h2{font-family:var(--f-display);font-size:24px;margin:0;line-height:1.25;text-wrap:balance}
@@ -107,6 +108,94 @@ mark{background:color-mix(in srgb,var(--star) 30%,transparent);color:inherit;bor
 .erow{display:flex;gap:8px;flex-wrap:wrap}
 .pbtn{height:46px;padding:0 18px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
+
+/* ===== Colour theme v2: each building has its own hue; depth via layered shadows ===== */
+:root{
+  --bg:#eef3fb; --surface:#ffffff; --line:#e3e8f2; --fg:#16203a; --muted:#66708a;
+  --hero-a:#0fb5a7; --hero-b:#2f6bff; --hero-c:#ff4f8b;
+  --sh1:0 1px 2px rgba(22,32,58,.06),0 4px 14px rgba(22,32,58,.07);
+  --sh2:0 2px 4px rgba(22,32,58,.08),0 14px 34px rgba(22,32,58,.14);
+  --sat:78%; --lit:44%; --tint:95%; --tsat:90%;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1020; --surface:#151c33; --line:#232c48; --fg:#eef2ff; --muted:#98a2c0;
+  --hero-a:#0e8f86; --hero-b:#2851c9; --hero-c:#c23a6c;
+  --sh1:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  --sh2:0 2px 6px rgba(0,0,0,.5),0 18px 40px rgba(0,0,0,.55);
+  --sat:85%; --lit:68%; --tint:20%; --tsat:40%;}}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --surface:#151c33; --line:#232c48; --fg:#eef2ff; --muted:#98a2c0;
+  --hero-a:#0e8f86; --hero-b:#2851c9; --hero-c:#c23a6c;
+  --sh1:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  --sh2:0 2px 6px rgba(0,0,0,.5),0 18px 40px rgba(0,0,0,.55);
+  --sat:85%; --lit:68%; --tint:20%; --tsat:40%;}
+[style*="--h"]{--c:hsl(var(--h) var(--sat) var(--lit));--ct:hsl(var(--h) var(--tsat) var(--tint));--cg:hsl(var(--h) 85% 52%)}
+body{background:radial-gradient(1200px 500px at 10% -10%,color-mix(in srgb,var(--hero-a) 14%,transparent),transparent 60%),
+  radial-gradient(900px 500px at 100% 0%,color-mix(in srgb,var(--hero-c) 10%,transparent),transparent 60%),var(--bg);background-attachment:fixed}
+body::before{background:var(--hero-b)}
+
+header{background:linear-gradient(125deg,var(--hero-a),var(--hero-b) 55%,var(--hero-c));color:#fff;border-radius:0 0 26px 26px;
+  margin-inline:-16px;padding:20px 18px 14px;box-shadow:0 10px 30px color-mix(in srgb,var(--hero-b) 35%,transparent);overflow:hidden;isolation:isolate}
+header::after{content:"";position:absolute;inset:-40% -10% auto auto;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%);z-index:-1;pointer-events:none}
+@media (min-width:672px){header{margin-inline:0;border-radius:0 0 26px 26px}}
+h1{font-size:26px;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,.15)}
+h1 small{color:rgba(255,255,255,.85);font-weight:400;letter-spacing:.2px}
+.linkbtn{color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;font-weight:500;backdrop-filter:blur(6px)}
+.field input{border:0;background:#fff;color:#16203a;box-shadow:0 6px 18px rgba(10,20,60,.18),inset 0 0 0 1px rgba(255,255,255,.6)}
+.field input::placeholder{color:#8a93ab}
+.field input:focus{box-shadow:0 6px 18px rgba(10,20,60,.18),0 0 0 3px rgba(255,255,255,.6)}
+.clear{color:#8a93ab}
+.mic{background:linear-gradient(145deg,#ffd23f,#ff8a3d);color:#3a1600;box-shadow:0 6px 18px rgba(255,138,61,.5),inset 0 1px 0 rgba(255,255,255,.6)}
+.mic.on{background:linear-gradient(145deg,#ff6b6b,#e0245e);color:#fff}
+.hint{color:rgba(255,255,255,.88)}
+.hint b{color:#fff}
+.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;font-weight:500}
+.chip[aria-pressed="true"]{background:#fff;border-color:#fff;color:var(--c,#2f6bff);font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.chip[style*="--h"]::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cg);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+
+.sec{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;letter-spacing:.3px;text-transform:none;color:var(--c,var(--muted));margin:24px 4px 8px}
+.sec[style*="--h"]::before{content:"";width:10px;height:22px;border-radius:4px;background:linear-gradient(var(--cg),var(--c))}
+.sec .cnt{font-weight:400;color:var(--muted);font-size:12.5px}
+.list{border:0;border-radius:18px;box-shadow:var(--sh1)}
+.row{position:relative;padding:13px 16px 13px 20px}
+.row[style*="--h"]::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:5px;border-radius:0 4px 4px 0;background:var(--c)}
+.row:hover{background:color-mix(in srgb,var(--ct) 60%,transparent)}
+.row:active{background:var(--ct)}
+.row .name{font-weight:600}
+.row .meta{font-weight:300}
+.row .num{color:var(--c,var(--fg));font-weight:700;font-size:25px;text-shadow:0 1px 0 color-mix(in srgb,var(--c,#000) 15%,transparent)}
+
+.big{border:0;background:linear-gradient(135deg,var(--surface) 55%,var(--ct));box-shadow:var(--sh1);border-left:6px solid var(--c);border-radius:18px}
+.big .n1{color:var(--c)}
+.big .n2{color:var(--c);opacity:.7;font-weight:500}
+.big .bmeta{font-weight:300}
+.big.top{border:0;color:#fff;background:linear-gradient(135deg,var(--cg),hsl(calc(var(--h) + 35) 80% 42%));box-shadow:0 16px 40px color-mix(in srgb,var(--cg) 45%,transparent)}
+.big.top .n1,.big.top .n2{color:#fff}
+.big.top .bmeta{color:rgba(255,255,255,.85)}
+.big.top mark{background:rgba(255,255,255,.3)}
+
+.scrim{background:rgba(8,12,30,.55);backdrop-filter:blur(3px)}
+.sheet{overflow:hidden;padding:0;gap:0;box-shadow:var(--sh2),0 30px 80px rgba(0,0,0,.25)}
+.sheet .shead{background:linear-gradient(135deg,var(--cg,var(--hero-b)),hsl(calc(var(--h,220) + 35) 80% 42%));color:#fff;padding:20px 24px 18px;display:grid;gap:4px}
+.sheet .shead .cat{color:rgba(255,255,255,.85);font-weight:500}
+.sheet .shead .bignum{color:#fff;font-size:clamp(56px,17vw,88px);font-weight:700;text-shadow:0 4px 18px rgba(0,0,0,.18);margin-top:4px}
+.sheet .sbody{padding:18px 24px 22px;display:grid;gap:14px}
+.alt a{color:var(--c);border-color:color-mix(in srgb,var(--c) 35%,transparent);background:var(--ct);font-weight:600;font-size:18px;padding:6px 14px}
+.callbtn{background:linear-gradient(135deg,#22c55e,#0ea371);box-shadow:0 8px 20px rgba(14,163,113,.4);font-size:20px}
+.sbtn{background:var(--surface);box-shadow:var(--sh1);border-color:var(--line)}
+.sheet.editor{padding:24px;gap:10px}
+.pbtn{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#fff}
+.sample{font-weight:300}
+.list,.bigs{grid-template-columns:minmax(0,1fr)}
+.row .num{flex:none;white-space:nowrap}
+.row .info{overflow:hidden}
+.field input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.big.top mark,.big.top .bname mark{color:#fff}
+.bignum.long,.sheet .shead .bignum.long{font-size:clamp(34px,10vw,52px);letter-spacing:1px}
+.bnums span.long.n1,.big.top .n1.long{font-size:clamp(28px,8.5vw,44px)}
+.bnums span.long.n2{font-size:clamp(18px,5vw,24px)}
+.row .num{font-size:min(25px,6vw)}
 </style>
 
 <div class="wrap">
@@ -128,7 +217,7 @@ mark{background:color-mix(in srgb,var(--star) 30%,transparent);color:inherit;bor
     <div class="chips" id="chips"></div>
   </header>
   <main id="out"></main>
-  <p class="sample" id="sampleNote">เบอร์จากแผ่นติดผนัง 2 แผ่น รายการที่มี ⚠ สองแผ่นให้เบอร์ไม่ตรงกัน ควรโทรยืนยันก่อน</p>
+  <p class="sample" id="sampleNote">รวมจากแผ่นติดผนังและทะเบียนโทรศัพท์ รพ. (UP 8 ต.ค. 69) รายการที่มี ⚠ ควรโทรยืนยันก่อน</p>
 </div>
 <div id="layer"></div>
 
@@ -147,28 +236,26 @@ Stroke Unit (ชั้น 4)	9299,9706	ตึกอายุรกรรม	ส�
 เฉพาะโรค 2 (ชั้น 2)	9695	ตึกเฉพาะโรค	เฉพาะโรคสอง	
 เฉพาะโรค 3 (ชั้น 3)	9168	ตึกเฉพาะโรค	เฉพาะโรคสาม	
 เฉพาะโรค 4 (ชั้น 4)	9357	ตึกเฉพาะโรค	เฉพาะโรคสี่	
-ศัลยกรรมชาย (ชั้น 1)	9135	ตึก 60 ปี	ศัลย์ชาย sx ชาย หกสิบปี	⚠ แผ่นที่ 2 มี ศช (114/1) เบอร์ 9136 / 9315
+ศัลยกรรมชาย ศช (ชั้น 1)	9135,9136	ตึก 60 ปี	ศัลย์ชาย ศช 114/1 sx ชาย หกสิบปี	
 ยูโร (ชั้น 2)	9378	ตึก 60 ปี	ยูโร uro urology ทางเดินปัสสาวะ 114/2 หกสิบปี	
 60 ปี ชั้น 3	9320	ตึก 60 ปี	หกสิบปี ชั้น 3	
 60 ปี ชั้น 4	9177	ตึก 60 ปี	หกสิบปี ชั้น 4	
 60 ปี ชั้น 5	9179	ตึก 60 ปี	หกสิบปี ชั้น 5	
-ศช (114/1)	9136,9315	ตึก 60 ปี	ศัลย์ชาย ศัลยกรรมชาย 114	⚠ มีเฉพาะแผ่นที่ 2 แผ่นที่ 1 ให้ศัลยกรรมชาย 9135
 ICU-med 1 (ชั้น 2)	9154	ตึกเอกซเรย์	ไอซียูเมด 1 micu icu med เอกซเรย์	
 CCU (ชั้น 3)	9692	ตึกเอกซเรย์	ซีซียู หัวใจ ccu	
 ICU-med 2 (ชั้น 3)	9696	ตึกเอกซเรย์	ไอซียูเมด 2 micu icu med	
 ICU-med 3 (ชั้น 3)	9761	ตึกเอกซเรย์	ไอซียูเมด 3 micu icu med	
 ไตเทียม (ชั้น 4)	9155	ตึกเอกซเรย์	ไต ฟอกไต hd hemodialysis	
 CAPD (ชั้น 4)	9370	ตึกเอกซเรย์	ซีเอพีดี ล้างไตทางช่องท้อง pd capd	
-ลีลาวดี	9728	ตึกเอกซเรย์	ลีลาวดี	
-ห้องฉุกเฉิน ER (ชั้น 1)	9405,9704,9107	ตึกอุบัติเหตุ	อีอาร์ ฉุกเฉิน อุบัติเหตุ er	เบอร์ 9107 มีเฉพาะแผ่นที่ 2
+ห้องฉุกเฉิน ER (ชั้น 1)	9405,9704,9107,9198	ตึกอุบัติเหตุ	อีอาร์ ฉุกเฉิน อุบัติเหตุ er	
 Trauma ICU / ICU ศัลย์ ER7 (ชั้น 7)	9604	ตึกอุบัติเหตุ	ทรอม่า trauma er7 อีอาร์เจ็ด ไอซียูศัลย์ sicu	
 ICU ศัลย์ (ชั้น 7)	9151,9152	ตึกอุบัติเหตุ	ไอซียูศัลย์ sicu icu sx	
 ศอ.8 / Trauma ER8 (ชั้น 8)	9681,9682	ตึกอุบัติเหตุ	ศอ8 ศอ 8 ศัลยกรรมอุบัติเหตุ ทรอม่า trauma er8	
 ENT หู คอ จมูก (ชั้น 8)	9689	ตึกอุบัติเหตุ	อีเอ็นที หู er8	
 ศกช (ชั้น 9)	9336	ตึกอุบัติเหตุ	ศกช ศัลยกรรมกระดูกชาย กระดูกชาย ortho er9	
 ตา (ชั้น 9)	9178	ตึกอุบัติเหตุ	จักษุ eye er9	
-ศกญ (ชั้น 10)	9138,9311	ตึกอุบัติเหตุ	ศกญ ศัลยกรรมกระดูกหญิง กระดูกหญิง ortho er10	เบอร์ 9311 มีเฉพาะแผ่นที่ 2
-พิเศษศัลย์กระดูก ER10 (ชั้น 10)	9705	ตึกอุบัติเหตุ	พิเศษกระดูก er10 ortho	
+ศกญ (ชั้น 10)	9138,9311	ตึกอุบัติเหตุ	ศกญ ศัลยกรรมกระดูกหญิง กระดูกหญิง ortho er10	
+พิเศษอุบัติเหตุ ชั้น 10 / พิเศษศัลย์กระดูก ER10	9705	ตึกอุบัติเหตุ	พิเศษอุบัติเหตุ 10 พิเศษกระดูก er10 ortho	
 ศญ ศัลยกรรมหญิง ER11 (ชั้น 11)	9380	ตึกอุบัติเหตุ	ศญ ศัลย์หญิง sx หญิง er11	
 พิเศษอุบัติเหตุ 11 (ชั้น 11)	9735	ตึกอุบัติเหตุ	พิเศษอุบัติเหตุ	
 ห้องคลอด (ชั้น 2)	9145,9146	ตึกสูติกรรม	คลอด lr labour	
@@ -179,11 +266,11 @@ NICU (ชั้น 3)	9175	ตึกสูติกรรม	นิคู เอ
 เด็กเล็ก (ชั้น 5)	9170	ตึกสูติกรรม	เด็กเล็ก กุมาร	
 กุมาร เด็กโต (ชั้น 6)	9328	ตึกสูติกรรม	เด็ก เด็กโต ped สูติ6	
 ICU ทั่วไป/เด็ก (ชั้น 6)	9310	ตึกสูติกรรม	ไอซียูเด็ก picu icu เด็ก	
-ศัลยกรรมทั่วไป	9139	หน่วยบริการอื่น	ศัลย์ทั่วไป sx	
+Acute care / บริบาลเภสัช	9795	หน่วยบริการอื่น	อะคิวท์แคร์ แอคิวท์ acute care บริบาลเภสัช บริบาลเภสัชกรรม	
+Homeward / เยี่ยมบ้าน	9431	หน่วยบริการอื่น	โฮมวอร์ด โฮมวาร์ด home ward homeward เยี่ยมบ้าน ดูแลต่อเนื่อง	
+ศัลยกรรมทั่วไป	9139,9781	หน่วยบริการอื่น	ศัลย์ทั่วไป sx	
 วิสัญญี ชั้น 3	9234	หน่วยบริการอื่น	ดมยา anesthesia	
 วิสัญญี ชั้น 4	9229	หน่วยบริการอื่น	ดมยา anesthesia	
-ห้องตรวจ OPD ชั้น 1	9125	หน่วยบริการอื่น	โอพีดี opd ห้องตรวจ	
-ห้องตรวจ OPD ชั้น 2 (DM/GI)	9121,9130	หน่วยบริการอื่น	โอพีดี opd เบาหวาน dm gi	⚠ แผ่นที่ 1 ระบุ 9121 แผ่นที่ 2 ระบุ 9130
 เวชกรรมฟื้นฟู	9779	หน่วยบริการอื่น	กายภาพ rehab	
 คลินิกธาลัสซีเมีย	9174	หน่วยบริการอื่น	ธาลัส thalassemia	
 บริบาลบรรเทา	9409	หน่วยบริการอื่น	palliative ประคับประคอง	
@@ -209,15 +296,95 @@ IC ควบคุมการติดเชื้อ	9227	หน่วยบ�
 การเงินยานอก	9245	เภสัชกรรม	การเงิน opd	
 ศูนย์คอมพิวเตอร์	9270,9271	สนับสนุน	ศูนย์คอม ไอที it คอม	
 ซ่อมบำรุง	9277	สนับสนุน	ช่าง ซ่อม	
-รปภ. หน้า รพ.	9194	สนับสนุน	ยาม รปภ	
-รปภ. หน้าลิฟต์ ตึก 11	9780	สนับสนุน	ยาม รปภ ลิฟต์	
+รปภ. ประตูทางเข้าด้านหน้า รพ.	9194	รปภ./ลิฟต์	ยาม รปภ ประตูหน้า หน้าโรงพยาบาล	
+รปภ. หน้าลิฟต์ ตึกอุบัติเหตุ 11 ชั้น	9708	รปภ./ลิฟต์	ยาม รปภ ลิฟต์ ตึก 11	
 ร้านค้า รพ.	9398	สนับสนุน	ร้านค้า	
 ศูนย์อาหาร	9258	สนับสนุน	อาหาร โรงอาหาร	
 พัสดุ (คลังสำนักงาน)	9332	สนับสนุน	พัสดุ คลังสนง	
 พัสดุ (คลังการแพทย์)	9254	สนับสนุน	พัสดุ คลังการแพทย์	
-พัสดุ (งานจัดซื้อ ชั้น 3)	9257	สนับสนุน	พัสดุ จัดซื้อ	`;
+พัสดุ (งานจัดซื้อ ชั้น 3)	9257	สนับสนุน	พัสดุ จัดซื้อ	
+จุดคัดกรอง OPD ชั้น 1	9106	อาคารผู้ป่วยนอก	คัดกรอง screening opd ชั้น 1	
+ศูนย์แนะนำก่อนรักษา (22)	9124	อาคารผู้ป่วยนอก	แนะนำก่อนรักษา admit แอดมิท	
+ห้องแนะนำก่อนผ่าตัด (PAC)	9701	อาคารผู้ป่วยนอก	แพค pac ก่อนผ่าตัด	
+เวชปฏิบัติทั่วไป (7)	9128	อาคารผู้ป่วยนอก	gp เวชปฏิบัติ ห้อง 7	
+ห้องตรวจอายุรกรรม OPD (8-12)	9125,9321	อาคารผู้ป่วยนอก	ห้องตรวจเมด opd med อายุรกรรม opd ชั้น 1	
+ห้องตรวจศัลยกรรม OPD (26)	9132	อาคารผู้ป่วยนอก	ห้องตรวจศัลย์ opd sx	
+ห้องตรวจศัลยกรรมยูโร (26)	9295	อาคารผู้ป่วยนอก	ยูโร uro opd	
+ห้องตรวจกระดูก (18-19)	9126,9786	อาคารผู้ป่วยนอก	ออร์โธ ortho กระดูก opd	
+ห้องตรวจเวชฟื้นฟู (14)	9785	อาคารผู้ป่วยนอก	กายภาพ rehab opd	
+ห้องตรวจคลื่นหัวใจ EKG (38)	9127	อาคารผู้ป่วยนอก	อีเคจี ekg ecg คลื่นหัวใจ	
+ห้องตรวจ SMC ผิวหนัง	9601	อาคารผู้ป่วยนอก	ผิวหนัง smc skin	
+ห้องฉีดยา-ทำแผล OPD	9215	อาคารผู้ป่วยนอก	ฉีดยา ทำแผล	
+ห้องให้คำปรึกษา / ชวนชม (คลินิกผู้สูงอายุ)	9722	อาคารผู้ป่วยนอก	ปรึกษา counseling ชวนชม ผู้สูงอายุ geriatric ตึกสงฆ์	
+คลินิกพิเศษเบาหวาน OPD ชั้น 2	9121	อาคารผู้ป่วยนอก	เบาหวาน dm opd ชั้น 2	
+คลินิกกระเพาะอาหาร/ตับ OPD ชั้น 2	9130	อาคารผู้ป่วยนอก	กระเพาะ ตับ gi ระบบทางเดินอาหาร opd ชั้น 2	
+ทันตกรรม	9160,9161	อาคารผู้ป่วยนอก	ฟัน หมอฟัน dental	9161 = หัวหน้าทันตกรรม
+คลินิกโรคปอด OPD ชั้น 2	9687	อาคารผู้ป่วยนอก	ปอด	⚠ ชื่อในภาพอ่านไม่ชัด
+ห้องตรวจตา OPD ชั้น 2	9166	อาคารผู้ป่วยนอก	ตา จักษุ eye opd	
+ห้องตรวจหู คอ จมูก OPD	9169	อาคารผู้ป่วยนอก	ent อีเอ็นที หู opd	
+ห้องตรวจนอนกรน	9796	อาคารผู้ป่วยนอก	นอนกรน sleep	
+ห้องการเงิน OPD ชั้น 2	9721	อาคารผู้ป่วยนอก	การเงิน opd	
+OPD LAB (ตึกสงฆ์ชั้น 1)	9772,9342	อาคารผู้ป่วยนอก	แล็บ แลป lab opd lab	9342 = นอกเวลา
+ลีลาวดี / ตึกจิตเวช (ตึกสงฆ์ชั้น 2)	9728,9730	หอผู้ป่วยอื่น	ลีลาวดี จิตเวช psych	
+ชั้น 4 ตึกสงฆ์ (ชื่ออ่านไม่ชัด)	9269	หอผู้ป่วยอื่น	ตึกสงฆ์ ชั้น 4	⚠ ชื่อในภาพอ่านไม่ชัด
+โรงพยาบาลมหาสารคาม (เบอร์กลาง สายนอก)	043-723355,043-723356,043-723357,043-723358,043-723359	ประชาสัมพันธ์	เบอร์กลาง เบอร์ รพ เบอร์โรงพยาบาล โอเปอเรเตอร์ operator สายนอก รพมค มหาสารคาม	เบอร์ภายนอก 043-723355 ถึง 043-723359
+ประชาสัมพันธ์ ER	9100,9101	ประชาสัมพันธ์	ปชส ประชาสัมพันธ์ information	
+ประชาสัมพันธ์ศูนย์จองห้องพิเศษ	9189	ประชาสัมพันธ์	จองห้องพิเศษ ห้องพิเศษ	
+ประชาสัมพันธ์ ชั้น 4	9123	ประชาสัมพันธ์	ปชส ชั้น 4	
+แจ้งเหตุฉุกเฉิน (สายด่วนใน รพ.)	9222	ประชาสัมพันธ์	ฉุกเฉิน สายด่วน แจ้งเหตุ code	
+เลขาหน้าห้องผู้อำนวยการ	9201	สำนักงาน/บริหาร	ผอ ผู้อำนวยการ เลขา	
+ห้องรองแพทย์	9400	สำนักงาน/บริหาร	รองผอ รองแพทย์	
+ห้องรองบริหาร	9688	สำนักงาน/บริหาร	รองบริหาร	
+ห้องหัวหน้าการพยาบาล	9204	สำนักงาน/บริหาร	หัวหน้าพยาบาล หัวหน้าการพยาบาล	
+กลุ่มการพยาบาล	9205,9212	สำนักงาน/บริหาร	การพยาบาล	
+บริหารทั่วไป	9206,9207,9794	สำนักงาน/บริหาร	ธุรการ บริหาร	9794 = หัวหน้าธุรการ
+งานทรัพยากรบุคคล (การเจ้าหน้าที่)	9208	สำนักงาน/บริหาร	hr การเจ้าหน้าที่ บุคคล	
+การเงินและบัญชี	9209,9210	สำนักงาน/บริหาร	การเงิน บัญชี	
+หัวหน้าการเงิน	9789	สำนักงาน/บริหาร	การเงิน	
+นิติกร	9902	สำนักงาน/บริหาร	กฎหมาย นิติกร	⚠ เบอร์ในภาพอ่านไม่ชัด
+เวชกรรมสังคม	9211,9297	สำนักงาน/บริหาร	เวชกรรมสังคม	9297 = หัวหน้า
+งานระบาด	9372	สำนักงาน/บริหาร	ระบาด ระบาดวิทยา เวชกรรมสังคม	
+สุขศึกษา	9216	สำนักงาน/บริหาร	สุขศึกษา	
+สำนักงานพัสดุ OPD ชั้น 3	9256	สนับสนุน	พัสดุ	
+เลขาแพทย์	9218	สำนักงาน/บริหาร	เลขาแพทย์	
+เวชนิทัศน์	9225	สำนักงาน/บริหาร	เวชนิทัศน์ โสต	
+ห้องประชุมตักสิลา	9226	สำนักงาน/บริหาร	ห้องประชุม ตักสิลา	
+งานวิจัย	9750	สำนักงาน/บริหาร	วิจัย research	
+งานแผน ศูนย์ข้อมูลวิชาการ	9221,9224	สำนักงาน/บริหาร	แผน ข้อมูล	
+งานคุณภาพ (HA)	9220,9223	สำนักงาน/บริหาร	คุณภาพ ha	
+งานพัฒนาทรัพยากรบุคคล (HRD)	9385	สำนักงาน/บริหาร	hrd อบรม	
+ห้องบัตร ชั้น 1	9162	เวชระเบียน/ประกัน	ห้องบัตร ทำบัตร	
+เวชระเบียน ชั้น 1 (บัตร+ทรบ.)	9163	เวชระเบียน/ประกัน	เวชระเบียน	
+เวชระเบียน ชั้น 3	9159,9374,9383	เวชระเบียน/ประกัน	เวชระเบียน	
+ห้องเก็บชาร์ต	9165	เวชระเบียน/ประกัน	ชาร์ต chart	
+Audit chart ชั้น 3	9309	เวชระเบียน/ประกัน	ออดิต audit ชาร์ต	
+สนง.ประกันสุขภาพ ชั้น 3	9213	เวชระเบียน/ประกัน	ประกันสุขภาพ บัตรทอง สปสช สิทธิ	
+งานประกันสังคม	9214	เวชระเบียน/ประกัน	ประกันสังคม สิทธิ	
+งานอาชีวอนามัย	9260	เวชระเบียน/ประกัน	อาชีวอนามัย	
+ศูนย์ประสานงานส่งต่อ (REFER)	9104,9105	ตึกอุบัติเหตุ	รีเฟอร์ refer ส่งต่อ	
+ห้องหัวหน้า ER	9308	ตึกอุบัติเหตุ	หัวหน้า er	⚠ เบอร์ในภาพอ่านไม่ชัด
+ศูนย์เปล ER	9605	ตึกอุบัติเหตุ	เปล er	⚠ เบอร์ในภาพอ่านไม่ชัด
+ศูนย์เปลล่าง + เปลใน	9275	สนับสนุน	เปล พนักงานเปล	
+ศูนย์เปลหน้า ปชส. OPD	9110	สนับสนุน	เปล opd	
+ห้องกู้ชีพ	9113	ตึกอุบัติเหตุ	กู้ชีพ ems	
+EMS หน้าห้อง CT	9733	ตึกอุบัติเหตุ	ems อีเอ็มเอส	
+ห้องการเงิน ER	9287	ตึกอุบัติเหตุ	การเงิน er	
+ห้อง X-ray / CT scan (ER)	9680	ตึกอุบัติเหตุ	เอกซเรย์ xray ซีที ct	⚠ เบอร์ในภาพอ่านไม่ชัด
+MRI รพ.มค.	9790	ตึกอุบัติเหตุ	เอ็มอาร์ไอ mri	⚠ เบอร์ในภาพอ่านไม่ชัด (9790 หรือ 9750)
+ห้องบัตร ER	9108	ตึกอุบัติเหตุ	ห้องบัตร er	
+รปภ. สะพานประชารักษ์	9191	รปภ./ลิฟต์	ยาม รปภ สะพาน	
+ป้อมยามหน้าหน่วยยานพาหนะ	9199	รปภ./ลิฟต์	ยาม ยานพาหนะ รถ	
+ห้องกล้องวงจรปิด อาคารอุบัติเหตุ	9770	รปภ./ลิฟต์	cctv กล้อง	
+จุดคัดกรองหน้า ER	9732	รปภ./ลิฟต์	คัดกรอง er	
+อาคารสูติกรรม หน้าลิฟต์ชั้น 1	9775	รปภ./ลิฟต์	ลิฟต์ สูติ	
+อาคาร 60 ปี หน้าลิฟต์ชั้น 1	9773	รปภ./ลิฟต์	ลิฟต์ 60 ปี หกสิบปี	
+อาคารอายุรกรรม หน้าลิฟต์ชั้น 1	9774	รปภ./ลิฟต์	ลิฟต์ อายุรกรรม	
+ป้อมยามทางออกด้านหลัง	9776	รปภ./ลิฟต์	ยาม ประตูหลัง	
+อาคารทองดี-แก้วหน้า ลิฟต์ชั้น 1	9729	รปภ./ลิฟต์	ลิฟต์ ทองดี	
+ชั้น 1 อาคารบำบัดรักษา	9780	รปภ./ลิฟต์	บำบัดรักษา	
+ใต้ถุนแฟลตแพทย์	9771	รปภ./ลิฟต์	แฟลตแพทย์	`;
 
-const KEY = 'hospdir.v2', FAV='hospdir.fav', REC='hospdir.rec';
+const KEY = 'hospdir.v3', FAV='hospdir.fav', REC='hospdir.rec';
 const store = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},
                set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
 
@@ -245,12 +412,14 @@ function score(d,q){
   const name=norm(d.name), al=norm(d.alias), all=name+' '+al+' '+d.nums.join(' ')+' '+norm(d.cat);
   const nospace = all.replace(/\s/g,'');
   if(name===q) return 100;
+  const exactAlias = al.split(' ').includes(q);
   let s=0;
   if(name.startsWith(q)) s+=60;
   if(all.includes(q)) s+=40;
   else if(nospace.includes(q.replace(/\s/g,''))) s+=30;
   const toks=q.split(' ').filter(Boolean);
   if(toks.length>1 && toks.every(t=>all.includes(t))) s+=25;
+  if(exactAlias) s+=45;
   return s;
 }
 function hl(text,q){
@@ -260,21 +429,23 @@ function hl(text,q){
   return esc(text).replace(new RegExp('('+toks.join('|')+')','gi'),'<mark>$1</mark>');
 }
 
+const HUES=[200,350,28,262,145,190,320,12,232,300,170,280,128,215];
+const hueOf=c=>{const cats=[...new Set(DATA.map(d=>d.cat))];const i=cats.indexOf(c);return i<0?220:HUES[i%HUES.length]};
 function rowHTML(d,q){
-  return `<button class="row" type="button" data-id="${d.id}">
+  return `<button class="row" type="button" data-id="${d.id}" style="--h:${hueOf(d.cat)}">
     <div class="info"><div class="name">${favs.has(d.name)?'<span class="fav">★</span>':''}${hl(d.name,q)}</div>
     <div class="meta">${esc(d.cat)}${d.nums.length>1?' · '+d.nums.length+' เบอร์':''}${d.note?' · '+esc(d.note):''}</div></div>
     <div class="num">${hl(d.nums[0],q)}</div></button>`;
 }
 function bigHTML(d,q,top){
-  return `<button class="big${top?' top':''}" type="button" data-id="${d.id}">
+  return `<button class="big${top?' top':''}" type="button" data-id="${d.id}" style="--h:${hueOf(d.cat)}">
     <div class="bname">${favs.has(d.name)?'<span class="fav">★</span>':''}${hl(d.name,q)}</div>
     <div class="bmeta">${esc(d.cat)}${d.note?' · '+esc(d.note):''}</div>
-    <div class="bnums">${d.nums.map((n,i)=>`<span class="${i?'n2':'n1'}">${hl(n,q)}</span>`).join('')}</div></button>`;
+    <div class="bnums">${d.nums.map((n,i)=>`<span class="${i?'n2':'n1'}${n.length>5?' long':''}">${hl(n,q)}</span>`).join('')}</div></button>`;
 }
 function renderChips(){
   const cats=['ทั้งหมด',...new Set(DATA.map(d=>d.cat))]; if(DATA.some(d=>d.note.includes('⚠'))) cats.push(WARN);
-  $('#chips').innerHTML=cats.map(c=>`<button class="chip" type="button" aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  $('#chips').innerHTML=cats.map(c=>`<button class="chip" type="button" aria-pressed="${c===cat}" data-c="${esc(c)}"${DATA.some(d=>d.cat===c)?` style="--h:${hueOf(c)}"`:''}>${esc(c)}</button>`).join('');
 }
 function render(){
   const q=cleanQuery($('#q').value);
@@ -293,7 +464,7 @@ function render(){
     if(fav.length) html+=`<div class="sec">ติดดาว</div><div class="list">${fav.map(d=>rowHTML(d)).join('')}</div>`;
     if(rec.length) html+=`<div class="sec">โทรล่าสุด</div><div class="list">${rec.map(d=>rowHTML(d)).join('')}</div>`;
     const groups={}; pool.forEach(d=>(groups[d.cat]??=[]).push(d));
-    for(const [c,arr] of Object.entries(groups)) html+=`<div class="sec">${esc(c)}</div><div class="list">${arr.map(d=>rowHTML(d)).join('')}</div>`;
+    for(const [c,arr] of Object.entries(groups)) html+=`<div class="sec" style="--h:${hueOf(c)}">${esc(c)} <span class="cnt">${arr.length} หน่วยงาน</span></div><div class="list">${arr.map(d=>rowHTML(d)).join('')}</div>`;
   }
   $('#out').innerHTML=html;
   $('#sampleNote').hidden = raw!==null;
@@ -304,16 +475,16 @@ function closeLayer(){ $('#layer').innerHTML=''; }
 function toast(t){ const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.append(el); setTimeout(()=>el.remove(),1800); }
 function openSheet(d){
   const n=d.nums[0];
-  $('#layer').innerHTML=`<div class="scrim" data-x></div><div class="sheet" role="dialog" aria-label="${esc(d.name)}">
-    <div class="cat">${esc(d.cat)}</div><h2>${esc(d.name)}</h2>
-    <div class="bignum" id="big">${esc(n)}</div>
+  $('#layer').innerHTML=`<div class="scrim" data-x></div><div class="sheet" role="dialog" aria-label="${esc(d.name)}" style="--h:${hueOf(d.cat)}">
+    <div class="shead"><div class="cat">${esc(d.cat)}</div><h2>${esc(d.name)}</h2>
+    <div class="bignum${n.length>5?' long':''}" id="big">${esc(n)}</div></div><div class="sbody">
     ${d.nums.length>1?`<div class="alt">${d.nums.slice(1).map(x=>`<a href="tel:${esc(x)}" data-call="${esc(x)}">${esc(x)}</a>`).join('')}</div>`:''}
     ${d.note?`<div class="note">${esc(d.note)}</div>`:''}
     <div class="actions">
       <a class="callbtn" href="tel:${esc(n)}" data-call="${esc(n)}">โทร ${esc(n)}</a>
       <button class="sbtn" type="button" id="cp">คัดลอก</button>
       <button class="sbtn star" type="button" id="st" aria-pressed="${favs.has(d.name)}" aria-label="ติดดาว">★</button>
-    </div></div>`;
+    </div></div></div>`;
   $('#layer').onclick=e=>{
     if(e.target.dataset.x!==undefined) return closeLayer();
     const c=e.target.closest('[data-call]');
